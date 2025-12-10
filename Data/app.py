@@ -102,7 +102,7 @@ body {
 @st.cache_resource
 def load_model():
     # OPTION 1: Use the folder of your script (recommended)
-    BASE_DIR = os.path.dirname("D:\DATA SCIENCE\ML\PROJECTS\MPG_REG\app.py")
+    BASE_DIR = os.path.dirname(r"D:\DATA SCIENCE\ML\PROJECTS\MPG_REG\app.py")
     scaler_path = os.path.join(BASE_DIR, 'scaler.joblib')
     model_path = os.path.join(BASE_DIR, 'car_mileage_model.joblib')
 
@@ -232,3 +232,4 @@ if predict:
 st.markdown(
     "<p style='text-align:center; color:#94a3b8; margin-top:100px; font-size:15px;'> Big blocks, small Civics, and everything that makes car lovers smile — this one’s for you! ❤️ from Arun </p>",
     unsafe_allow_html=True)
+
