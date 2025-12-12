@@ -50,3 +50,6 @@ scaler.joblib – Saved StandardScaler
 notebook.ipynb – Workflow notebook
 
 README.md – Project documentation
+
+<img width="917" height="646" alt="image" src="https://github.com/user-attachments/assets/9e3a7449-335e-4b04-9397-283411b228f9" />
+
