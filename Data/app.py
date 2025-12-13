@@ -45,14 +45,12 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(90,50,200,0.4);
     }
 
-    .mpg-box {
+    .result-card {
         background: rgba(255,255,255,0.15); backdrop-filter: blur(15px);
-        border-radius: 40px; padding: 70px 40px; border: 1px solid rgba(255,255,255,0.3);
-        animation: glowBox 2.5s infinite alternate ease-in-out;
-    }
-    @keyframes glowBox {
-        0% {box-shadow: 0 0 15px rgba(124,58,237,0.3);}
-        100% {box-shadow: 0 0 35px rgba(124,58,237,0.6);}
+        border-radius: 30px; padding: 50px 20px; text-align: center;
+        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        margin: 20px 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -60,9 +58,7 @@ st.markdown("""
 # ==================== LOAD MODEL – FIXED FOR STREAMLIT CLOUD ====================
 @st.cache_resource
 def load_model():
-    # This works everywhere (local & Streamlit Cloud)
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    
     scaler_path = os.path.join(BASE_DIR, "scaler.joblib")
     model_path = os.path.join(BASE_DIR, "car_mileage_model.joblib")
 
@@ -79,14 +75,12 @@ def load_model():
     model = joblib.load(model_path)
     return scaler, model
 
-# Load the model (will show nice error if files are missing)
 scaler, model = load_model()
-
 if scaler is None or model is None:
-    st.stop()  # Stop execution if model didn't load
+    st.stop()
 
 # ==================== PAGE CONFIG ====================
-st.set_page_config(page_title="Car MPG Predictor", page_icon="car", layout="centered")
+st.set_page_config(page_title="Car MPG Predictor", page_icon="🚗", layout="centered")
 
 # ==================== TITLE ====================
 st.markdown("<h1 class='animated-title'>Car Fuel Efficiency Predictor</h1>", unsafe_allow_html=True)
@@ -120,40 +114,59 @@ model_year = st.slider("Model Year", 70, 82, 78, help="70 = 1970, 82 = 1982. New
 # ==================== EXAMPLES ====================
 st.info("""
 **Real-Life Examples**  
-1976 Ford Mustang → USA • 8 cyl • 300 HP • 3800 lbs • year 76 → ~14 MPG  
-1980 Honda Civic → Japan • 4 cyl • 67 HP • 2000 lbs • year 80 → ~36 MPG  
-1978 VW Golf/Rabbit → Europe • 4 cyl • 78 HP • 2200 lbs • year 78 → ~31 MPG
+1976 Ford Mustang → USA • 8 cyl • 300 HP • 3800 lbs • year 76 → ~14 MPG (~6.0 km/L)  
+1980 Honda Civic → Japan • 4 cyl • 67 HP • 2000 lbs • year 80 → ~36 MPG (~15.3 km/L)  
+1978 VW Golf/Rabbit → Europe • 4 cyl • 78 HP • 2200 lbs • year 78 → ~31 MPG (~13.2 km/L)
 """)
 
 # ==================== PREDICT BUTTON ====================
-if st.button("Predict MPG Now!", type="primary", use_container_width=True):
-    X = np.array([[cylinders, displacement, horsepower, weight, acceleration, model_year, origin]])
-    prediction = model.predict(scaler.transform(X))[0]
-    mpg = round(float(prediction), 1)
+if st.button("Predict Fuel Efficiency Now!", type="primary", use_container_width=True):
+    with st.spinner("Revving up the prediction engine..."):
+        X = np.array([[cylinders, displacement, horsepower, weight, acceleration, model_year, origin]])
+        prediction = model.predict(scaler.transform(X))[0]
+        mpg = round(float(prediction), 1)
+        km_per_liter = round(mpg * 0.425144, 1)  # Accurate conversion: 1 MPG ≈ 0.425144 km/L
 
     st.markdown("<div style='margin:60px 0'></div>", unsafe_allow_html=True)
-    st.markdown(f"""
-    <div style="text-align:center; padding:80px 30px; background:linear-gradient(135deg, #5b21b6, #7c3aed);
-                color:white; border-radius:40px; box-shadow:0 20px 50px rgba(0,0,0,0.35);">
-        <h1 style="font-size:80px; margin:0; color:white; line-height:1;">{mpg}</h1>
-        <h2 style="margin:15px 0 0; opacity:0.95;">Miles Per Gallon (MPG)</h2>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("<div style='margin:50px 0'></div>", unsafe_allow_html=True)
 
+    # === SIDE-BY-SIDE MPG & km/L CARDS ===
+    col_mpg, col_kml = st.columns(2)
+
+    with col_mpg:
+        st.markdown(f"""
+        <div class="result-card" style="background: linear-gradient(135deg, #5b21b6, #7c3aed);">
+            <h1 style="font-size:70px; margin:0; color:white;">{mpg}</h1>
+            <h3 style="margin:10px 0 0; color:white; opacity:0.9;">MPG</h3>
+            <p style="margin:5px 0 0; font-size:15px; color:white;">Miles Per Gallon (US Standard)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_kml:
+        st.markdown(f"""
+        <div class="result-card" style="background: linear-gradient(135deg, #dc2626, #f97316);">
+            <h1 style="font-size:70px; margin:0; color:white;">{km_per_liter}</h1>
+            <h3 style="margin:10px 0 0; color:white; opacity:0.9;">km/L</h3>
+            <p style="margin:5px 0 0; font-size:15px; color:white;">Kilometers Per Liter (Global)</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin:40px 0'></div>", unsafe_allow_html=True)
+    st.caption("🔄 Conversion: 1 MPG ≈ 0.425 km/L | Perfect for comparing US classics with the world!")
+
+    # === Feedback based on MPG ===
     if mpg >= 35:
-        st.success("Outstanding! Most likely a Japanese car!")
+        st.success("Outstanding efficiency! Probably a legend like the Civic!")
         st.balloons()
     elif mpg >= 28:
-        st.success("Excellent fuel economy!")
+        st.success("Excellent fuel economy — sips fuel like a pro!")
     elif mpg >= 20:
-        st.info("Good for the 1970s–80s")
+        st.info("Solid for the era — balanced power and efficiency")
     else:
-        st.warning("Classic American V8 — drinks gas, but sounds amazing!")
+        st.warning("Classic American muscle — drinks fuel, but sounds epic!")
 
 # ==================== FOOTER ====================
 st.markdown(
-    "<p style='text-align:center; color:#94a3b8; margin-top:100px; font-size:15px;'>"
+    "<p style='text-align:center; color:#94a3b8; margin-top:100px; font-size:16px; font-weight:600;'>"
     "Big blocks, small Civics, and everything that makes car lovers smile — this one’s for you! ❤️ from Arun</p>",
     unsafe_allow_html=True
 )
