@@ -1,216 +1,250 @@
 import streamlit as st
 import joblib
 import numpy as np
-import os
 
-# ==================== PAGE CONFIG - FULL WIDTH ====================
-st.set_page_config(page_title="Car MPG Predictor", page_icon="🚗", layout="wide")
-
-# ==================== CLEAN & ANIMATED UI ====================
-st.markdown("""
-<style>
-    #MainMenu, footer, header, .stDeployButton {visibility: hidden !important;}
-    .block-container {padding-top: 2rem !important;}
-    hr {display: none !important;}
-
-    .animated-title {
-        font-size: 48px;
-        font-weight: 800;
-        text-align: center;
-        background: linear-gradient(90deg, #7c3aed, #4f46e5);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        position: relative;
-        overflow: hidden;
-    }
-    .animated-title::after {
-        content: "";
-        position: absolute;
-        top: 0; left: -100%; width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        animation: shine 3s infinite;
-    }
-    @keyframes shine { 0% {left: -100%;} 50%,100% {left: 100%;} }
-
-    .stButton>button {
-        background: linear-gradient(135deg, #4f46e5, #9333ea);
-        color: white; border-radius: 12px; padding: 12px 25px;
-        font-size: 18px; border: none; box-shadow: 0 6px 20px rgba(90,50,200,0.25);
-        animation: floatBtn 3s ease-in-out infinite;
-    }
-    @keyframes floatBtn { 0%,100% {transform: translateY(0);} 50% {transform: translateY(-5px);} }
-    .stButton>button:hover {
-        transform: translateY(-8px) scale(1.03);
-        box-shadow: 0 15px 35px rgba(90,50,200,0.4);
-    }
-
-    .result-card {
-        background: rgba(255,255,255,0.15); backdrop-filter: blur(15px);
-        border-radius: 30px; padding: 50px 20px; text-align: center;
-        border: 1px solid rgba(255,255,255,0.3);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        margin: 20px 0;
-    }
-</style>
-""", unsafe_allow_html=True)
+# ==================== PAGE CONFIG ====================
+st.set_page_config(page_title="Customer Churn Predictor", page_icon="🏦", layout="wide")
 
 # ==================== LOAD MODEL ====================
 @st.cache_resource
 def load_model():
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    scaler_path = os.path.join(BASE_DIR, "scaler.joblib")
-    model_path = os.path.join(BASE_DIR, "car_mileage_model.joblib")
-
-    if not os.path.exists(scaler_path) or not os.path.exists(model_path):
-        st.error("Model files not found! Make sure scaler.joblib and car_mileage_model.joblib are in the same folder.")
-        return None, None
-
-    scaler = joblib.load(scaler_path)
-    model = joblib.load(model_path)
+    scaler = joblib.load("scaler.joblib")
+    scaler.feature_names_in_ = None
+    model = joblib.load("Churn_Prediction.joblib")
     return scaler, model
 
 scaler, model = load_model()
-if scaler is None or model is None:
-    st.stop()
+
+# ==================== PROFESSIONAL NAVY & ORANGE THEME (ALL TEXT WHITE) ====================
+st.markdown("""
+<style>
+    .stApp {
+        background: #001f3d;
+        color: #f0f0f0;
+    }
+    .big-title {
+        font-size: 3.8rem !important;
+        font-weight: 800;
+        text-align: center;
+        background: linear-gradient(90deg, #ff8c42, #ff6b35);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        white-space: nowrap;
+        margin: 30px 0;
+    }
+    .subtitle {
+        text-align: center;
+        font-size: 1.4rem;
+        color: #ffd7ba;
+        margin-bottom: 50px;
+    }
+    .stButton>button {
+        background: linear-gradient(135deg, #ff8c42, #ff6b35);
+        color: white !important;
+        border-radius: 50px;
+        padding: 14px 40px;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 8px 25px rgba(255, 140, 66, 0.4);
+        transition: all 0.3s;
+    }
+    .stButton>button:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(255, 140, 66, 0.6);
+    }
+    .result-box {
+        padding: 40px;
+        border-radius: 25px;
+        text-align: center;
+        font-size: 32px;
+        font-weight: bold;
+        margin: 40px 0;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        color: white;
+    }
+    .help-box {
+        background: rgba(255, 215, 186, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 140, 66, 0.3);
+        color: #ffd7ba;
+        padding: 20px;
+        border-radius: 18px;
+        margin: 15px 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        font-size: 17px;
+        transition: all 0.3s;
+    }
+    .help-box:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(255, 140, 66, 0.3);
+        background: rgba(255, 215, 186, 0.25);
+    }
+
+    /* ALL LABELS & INPUT TEXT WHITE */
+    label, .stMarkdown, .stSelectbox > div > div > div > div > div:first-child,
+    .stNumberInput > div > div > label,
+    .stSlider > div > div > div > label,
+    .stRadio > div > label,
+    .stExpander > div > label,
+    .streamlit-expanderHeader {
+        color: white !important;
+        font-weight: 600 !important;
+    }
+
+    /* NUMBER INPUT TEXT */
+    .stNumberInput > div > div > input {
+        color: white !important;
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* RADIO BUTTON OPTION TEXT (Yes/No, Male/Female) - THIS IS THE FIX */
+    .stRadio > div[role="radiogroup"] > label > div[data-testid="stMarkdownContainer"] > p {
+        color: white !important;
+        font-weight: 500 !important;
+    }
+
+    /* SLIDER VALUE */
+    .stSlider > div > div > div > div > div > div {
+        color: white !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # ==================== TITLE ====================
-st.markdown("<h1 class='animated-title'>Car Fuel Efficiency Predictor</h1>", unsafe_allow_html=True)
-st.markdown("<h5 style='text-align:center; color:#6b7280; margin-bottom:40px;'>1970–1982 Classic Cars</h5>", unsafe_allow_html=True)
+st.markdown("<h1 class='big-title'>Customer Churn Predictor</h1>", unsafe_allow_html=True)
+st.markdown('<p class="subtitle">Predict if a customer will stay or leave the bank</p>', unsafe_allow_html=True)
 
-# ==================== PRESET BUTTONS ====================
-st.markdown("#### 🚀 Quick Presets")
-preset_col1, preset_col2, preset_col3, reset_col = st.columns([1,1,1,1])
-
-with preset_col1:
-    if st.button("🇯🇵 Economy Car", use_container_width=True):
-        st.session_state.preset = "economy"
-
-with preset_col2:
-    if st.button("🇺🇸 Muscle Car", use_container_width=True):
-        st.session_state.preset = "muscle"
-
-with preset_col3:
-    if st.button("👨‍👩‍👧‍👦 Family Sedan", use_container_width=True):
-        st.session_state.preset = "family"
-
-with reset_col:
-    if st.button("🔄 Reset", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
-
-# Preset defaults
-if st.session_state.get("preset") == "economy":
-    defaults = {"cyl":4, "disp":100, "hp":70, "weight":2200, "acc":18.0, "year":80, "origin":3}
-elif st.session_state.get("preset") == "muscle":
-    defaults = {"cyl":8, "disp":350, "hp":200, "weight":4000, "acc":12.0, "year":74, "origin":1}
-elif st.session_state.get("preset") == "family":
-    defaults = {"cyl":6, "disp":200, "hp":120, "weight":3200, "acc":15.0, "year":78, "origin":1}
-else:
-    defaults = {"cyl":4, "disp":200, "hp":120, "weight":3000, "acc":15.0, "year":78, "origin":3}
-
-# ==================== INPUTS WITH EMOJIS ====================
+# ==================== QUICK PROFILES ====================
+st.markdown("### 🚀 Quick Test Profiles")
 col1, col2 = st.columns(2)
-
 with col1:
-    st.markdown("#### 🔥 Engine & Power")
-    cylinders = st.number_input("🔩 Number of Cylinders", 3, 8, defaults["cyl"], step=1,
-                                help="Most cars: 4 | Muscle/V8: 8")
-    displacement = st.number_input("🛢️ Engine Displacement (cu in)", 68.0, 455.0, float(defaults["disp"]), step=10.0,
-                                   help="Small engine: 70–150 | Big V8: 300–455")
-    horsepower = st.number_input("🐎 Horsepower (HP)", 40, 250, defaults["hp"], step=5,
-                                 help="Higher HP usually means lower fuel efficiency")
-
+    if st.button("✅ Safe Customer (Will Stay)", use_container_width=True):
+        st.session_state.profile = "safe"
 with col2:
-    st.markdown("#### 🚀 Weight & Performance")
-    weight = st.number_input("⚖️ Car Weight (lbs)", 1500, 6000, defaults["weight"], step=100,
-                             help="Light: 2000–2800 | Heavy: 4000+")
-    acceleration = st.number_input("🏁 0–60 mph (seconds)", 8.0, 30.0, defaults["acc"], step=0.5,
-                                   help="Fast: 8–12 sec | Slow: 18+ sec")
-    origin = st.selectbox("🌍 Country of Origin", [1, 2, 3],
-                          format_func=lambda x: {1: "🇺🇸 USA", 2: "🇪🇺 Europe", 3: "🇯🇵 Japan"}[x],
-                          index=defaults["origin"]-1,
-                          help="Japanese & European cars were usually more efficient in this era")
+    if st.button("⚠️ Risky Customer (Will Leave)", use_container_width=True):
+        st.session_state.profile = "risky"
 
-model_year = st.slider(
-    "📅 Model Year",
-    min_value=70,
-    max_value=82,
-    value=defaults["year"],
-    step=1,
-    format="19%02d",
-    help="Newer models (late 70s–80s) generally have better fuel efficiency due to regulations"
-)
+# Defaults
+if st.session_state.get("profile") == "safe":
+    defaults = {"credit":720, "age":42, "tenure":8, "balance":50000.0, "products":2,
+                "country":"France", "card":"Yes", "active":"Yes", "salary":80000.0, "gender":"Male"}
+elif st.session_state.get("profile") == "risky":
+    defaults = {"credit":376, "age":29, "tenure":4, "balance":115046.0, "products":4,
+                "country":"Germany", "card":"Yes", "active":"No", "salary":119346.0, "gender":"Female"}
+else:
+    defaults = {"credit":650, "age":38, "tenure":5, "balance":0.0, "products":1,
+                "country":"France", "card":"Yes", "active":"Yes", "salary":50000.0, "gender":"Male"}
 
-# ==================== PREDICT BUTTON ====================
-if st.button("Predict Fuel Efficiency Now!", type="primary", use_container_width=True):
-    with st.spinner("Calculating fuel efficiency..."):
-        X = np.array([[cylinders, displacement, horsepower, weight, acceleration, model_year, origin]])
-        prediction = model.predict(scaler.transform(X))[0]
-        mpg = round(float(prediction), 1)
-        km_per_liter = round(mpg * 0.425144, 1)
+# ==================== INPUT FORM ====================
+with st.form("churn_form"):
+    c1, c2 = st.columns(2)
+    with c1:
+        credit_score = st.slider("💳 Credit Score", 350, 900, defaults["credit"])
+        age = st.slider("🎂 Age", 18, 95, defaults["age"])
+        tenure = st.slider("📅 Tenure (years)", 0, 10, defaults["tenure"])
+        balance = st.number_input("💰 Balance ($)", min_value=0.0, max_value=250000.0,
+                                  value=defaults["balance"], step=1000.0)
+        num_products = st.selectbox("🏦 Number of Products", [1, 2, 3, 4], index=defaults["products"]-1)
 
-    st.markdown("<div style='margin:60px 0'></div>", unsafe_allow_html=True)
+    with c2:
+        country = st.selectbox("🌍 Country", ["France", "Spain", "Germany"],
+                              index=["France", "Spain", "Germany"].index(defaults["country"]))
+        gender = st.radio("👤 Gender", ["Male", "Female"], index=0 if defaults["gender"] == "Male" else 1)
+        has_cr_card = st.radio("💳 Has Credit Card?", ["Yes", "No"], index=0 if defaults["card"] == "Yes" else 1)
+        is_active = st.radio("✅ Is Active Member?", ["Yes", "No"], index=0 if defaults["active"] == "Yes" else 1)
+        salary = st.number_input("💵 Estimated Salary ($)", min_value=0.0, max_value=200000.0,
+                                 value=defaults["salary"], step=1000.0)
 
-    col_mpg, col_kml = st.columns(2)
-    with col_mpg:
-        st.markdown(f"""
-        <div class="result-card" style="background: linear-gradient(135deg, #5b21b6, #7c3aed);">
-            <h1 style="font-size:70px; margin:0; color:white;">{mpg}</h1>
-            <h3 style="margin:10px 0 0; color:white; opacity:0.9;">MPG</h3>
-            <p style="margin:5px 0 0; font-size:15px; color:white;">Miles Per Gallon</p>
-        </div>
-        """, unsafe_allow_html=True)
+    submitted = st.form_submit_button("🔮 Predict Churn Risk", use_container_width=True)
 
-    with col_kml:
-        st.markdown(f"""
-        <div class="result-card" style="background: linear-gradient(135deg, #dc2626, #f97316);">
-            <h1 style="font-size:70px; margin:0; color:white;">{km_per_liter}</h1>
-            <h3 style="margin:10px 0 0; color:white; opacity:0.9;">km/L</h3>
-            <p style="margin:5px 0 0; font-size:15px; color:white;">Kilometers Per Liter</p>
-        </div>
-        """, unsafe_allow_html=True)
+# ==================== PREDICTION ====================
+if submitted:
+    with st.spinner("Analyzing customer behavior..."):
+        has_card = 1 if has_cr_card == "Yes" else 0
+        active = 1 if is_active == "Yes" else 0
+        gender_male = 1 if gender == "Male" else 0
+        germany = 1 if country == "Germany" else 0
+        spain = 1 if country == "Spain" else 0
 
-    st.markdown("<div style='margin:30px 0'></div>", unsafe_allow_html=True)
-    st.caption("🔄 1 MPG ≈ 0.425 km/L | Based on UCI Auto MPG Dataset")
+        features = np.array([[credit_score, age, tenure, balance, num_products,
+                              has_card, active, salary, germany, spain, gender_male]])
+        scaled = scaler.transform(features)
+        prediction = model.predict(scaled)[0]
+        prob = model.predict_proba(scaled)[0]
 
-    if mpg >= 35:
-        st.success("🚀 Outstanding! Most likely a Japanese economy car — sips fuel!")
+        if prediction == 1:
+            st.markdown(f"<div class='result-box' style='background:linear-gradient(135deg, #dc2626, #ef4444);'>HIGH RISK: Customer is likely to LEAVE!<br>Churn Probability: <b>{prob[1]:.1%}</b></div>", unsafe_allow_html=True)
+        else:
+            st.markdown(f"<div class='result-box' style='background:linear-gradient(135deg, #10b981, #34d399);'>LOW RISK: Customer is likely to STAY!<br>Stay Probability: <b>{prob[0]:.1%}</b></div>", unsafe_allow_html=True)
+
+        st.progress(prob[1])
+        st.caption(f"Churn Risk: {prob[1]:.1%}  |  Stay Chance: {prob[0]:.1%}")
         st.balloons()
-    elif mpg >= 28:
-        st.success("✅ Excellent efficiency for the era!")
-    elif mpg >= 20:
-        st.info("👍 Solid balance of power and economy")
-    else:
-        st.warning("💪 Classic American muscle — drinks gas, but sounds amazing!")
 
-# ==================== FOOTER WITH NETWORKING (USING STREAMLIT COLUMNS & IMAGES) ====================
-# ==================== FOOTER WITH ONLY CLICKABLE LOGOS (NO LABELS) ====================
+# ==================== HELP SECTION ====================
+with st.expander("❓ Need Help Understanding the Fields?", expanded=False):
+    st.markdown("""
+    <div class="help-box">
+        <b>💳 Credit Score</b>: How trustworthy the customer is (350 = bad, 900 = excellent)
+    </div>
+    <div class="help-box">
+        <b>🎂 Age</b>: Customer age (18–95)
+    </div>
+    <div class="help-box">
+        <b>📅 Tenure</b>: Years with the bank
+    </div>
+    <div class="help-box">
+        <b>💰 Balance</b>: Account balance — high + inactive = danger
+    </div>
+    <div class="help-box">
+        <b>🏦 Number of Products</b>: 4 products + Germany = very high risk!
+    </div>
+    <div class="help-box">
+        <b>💳 Has Credit Card?</b>: Has bank's credit card
+    </div>
+    <div class="help-box">
+        <b>✅ Is Active Member?</b>: Uses account regularly? (No = red flag)
+    </div>
+    <div class="help-box">
+        <b>💵 Estimated Salary</b>: Yearly income
+    </div>
+    <div class="help-box">
+        <b>🌍 Country</b>: Germany has highest churn
+    </div>
+    <div class="help-box">
+        <b>👤 Gender</b>: Female slightly higher churn rate
+    </div>
+    <div style="background:rgba(255, 140, 66, 0.2); padding:20px; border-radius:15px; margin-top:20px; text-align:center; font-weight:bold; color:#ff8c42;">
+        🔥 Highest Risk: Germany + 4 Products + Female + Inactive + High Balance
+    </div>
+    """, unsafe_allow_html=True)
+
+# ==================== FOOTER WITH ONLY CLICKABLE ICONS ====================
 st.markdown("---")
-st.markdown("<h3 style='text-align:center; margin-bottom:30px;'>Big blocks, small Civics, and everything that makes car lovers smile — this one’s for you! ❤️ Arun</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align:center; color:#ffd7ba; margin-bottom:30px;'>Built with ❤️ by Arun</h3>", unsafe_allow_html=True)
 
-# Social Icons Row
 st.markdown("""
 <div style="display:flex; justify-content:center; gap:60px; margin:40px 0;">
-    <a href="https://www.linkedin.com/in/vadlamudi-arun-kumar/" target="_blank" title="LinkedIn" style="text-decoration:none;">
+    <a href="https://www.linkedin.com/in/vadlamudi-arun-kumar/" target="_blank" title="LinkedIn">
         <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" width="60" height="60" style="transition:0.3s;">
     </a>
-    <a href="https://github.com/VAKGK" target="_blank" title="GitHub" style="text-decoration:none;">
+    <a href="https://github.com/VAKGK" target="_blank" title="GitHub">
         <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="60" height="60" style="transition:0.3s;">
     </a>
-    <a href="vadlamudiarunkumar3@gmail.com" title="Email" style="text-decoration:none;">
+    <a href="mailto:vadlamudiarunkumar3@gmail.com" title="Email">
         <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" width="60" height="60" style="transition:0.3s;">
     </a>
-    <a href="https://codebasics.io/portfolio/VADLAMUDI-ARUN-KUMAR target="_blank" title="Portfolio" style="text-decoration:none;">
-        <img src="D:\DATA SCIENCE\ML\PROJECTS\MPG_REG\assets\pf.png" width="60" height="60" style="transition:0.3s;">
+    <a href="https://codebasics.io/portfolio/VADLAMUDI-ARUN-KUMAR" target="_blank" title="Portfolio">
+        <img src="https://cdn-icons-png.flaticon.com/512/2913/2913623.png" width="60" height="60" style="transition:0.3s;">
     </a>
 </div>
 
 <style>
     div a img:hover {
-        transform: translateY(-10px) scale(1.2);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        transform: translateY(-12px) scale(1.2);
+        filter: brightness(1.3);
     }
 </style>
 """, unsafe_allow_html=True)
 
-st.caption("Built with Streamlit • Random Forest Model • UCI Auto MPG Dataset")
+st.caption("Built with Streamlit • Random Forest Model • Real Banking Insights")
