@@ -259,11 +259,12 @@ st.markdown("""
         <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" width="65" height="65">
     </a>
     <a href="https://codebasics.io/portfolio/VADLAMUDI-ARUN-KUMAR" target="_blank" title="Portfolio">
-        <img src="https://cdn-icons-png.flaticon.com/512/2913/2913623.png" width="60" height="60" style="transition:0.3s;">
+        <img src="https://cdn-icons-png.flaticon.com/128/10856/10856864.png" width="60" height="60" style="transition:0.3s;">
     </a>
     
 </div>
 """, unsafe_allow_html=True)
 
 st.caption("Built with passion using Streamlit • Machine Learning • Classic Auto MPG Dataset")
+
 
